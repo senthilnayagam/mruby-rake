@@ -3,6 +3,10 @@ mruby-rake
 
 a simple rake task to complie your ruby code into a executable binary
 
+hacker news post to discuss it
+
+http://news.ycombinator.com/item?id=4709279
+
 
 modified version of code found here
 
