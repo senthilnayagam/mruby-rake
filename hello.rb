@@ -1,0 +1,1 @@
+puts "Thanks matz for mruby"
