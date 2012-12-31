@@ -1,5 +1,5 @@
 # Change the path to match the path to your machine.
-$mrb_path = File.expand_path("~/mruby/mruby")
+$mrb_path = ENV['MRUBY_PATH'] || File.expand_path(File.expand_path("../mruby"))
 $mrbc = File.join($mrb_path,"/bin/mrbc")
 
 task :default => ["example"]
@@ -9,13 +9,13 @@ task :compile do
   # dumps the Ruby file to disk
   File.open("temp.rb", "w"){|f| f << ruby_code }
   # creates the .c file containing mandelbrot char array for the bytecode
-  `#{$mrbc} -Bruby_bytecode ./temp.rb`
+  raise "MRBC CompileError"unless system("#{$mrbc} -Bruby_bytecode ./temp.rb")
   example_file = wrapper_code(File.read("./temp.c"))
   File.open("example.c", 'w'){|f| f << example_file}
   cmd = "gcc -I#{$mrb_path}/src -I#{$mrb_path}/include -c example.c -o example.o"
   cmd2 = "gcc -o ./example example.o #{$mrb_path}/lib/libmruby.a"
-  `#{cmd}`
-  `#{cmd2}`
+  raise "CompileError" unless system("#{cmd}")
+  raise "LinkError" unless system("#{cmd2}")
   print "compiled\n"
   print "executing\n"
   print "You can now run by running ./example\n"
@@ -84,16 +84,16 @@ task :compilefile do
 file = ENV['file']
 
   # dumps the Ruby file to disk
-cmd_copy = "cp #{ENV['file']} temp.rb"
-`#{cmd_copy}`
+  cmd_copy = "cp #{ENV['file']} temp.rb"
+  raise "CopyError" unless system("#{cmd_copy}")
   # creates the .c file containing mandelbrot char array for the bytecode
-  `#{$mrbc} -Bruby_bytecode ./temp.rb`
+  raise "MRBC compile error"unless system("#{$mrbc} -Bruby_bytecode ./temp.rb")
   example_file = wrapper_code(File.read("./temp.c"))
   File.open("example.c", 'w'){|f| f << example_file}
   cmd = "gcc -I#{$mrb_path}/src -I#{$mrb_path}/include -c example.c -o example.o"
   cmd2 = "gcc -o ./example example.o #{$mrb_path}/lib/libmruby.a"
-  `#{cmd}`
-  `#{cmd2}`
+  raise "CompileError" unless system("#{cmd}")
+  raise "LinkError" unless system("#{cmd2}")
   print "compiled\n"
   print "executing\n"
   print "You can now run by running ./example\n"
