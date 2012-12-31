@@ -105,6 +105,7 @@ task :compile, :program_name, :ruby_source, :use_gems do |t,args|
     end
   }
 
+
   # creates the .c file containing the bundled_ruby char array for the bytecode
   mrbc = "#{$mrbc} -Bruby_bytecode ./temp.rb"
   puts mrbc
