@@ -3,20 +3,6 @@ mruby-rake
 
 a rake task to complie your ruby code into a executable binary
 
-hacker news post to discuss it
-
-http://news.ycombinator.com/item?id=4709279
-
-
-modified version of code found here
-
-https://gist.github.com/3850240/863acd980a0b29b0d86bd8cececb1d91b9b5bd83
-
-thanks Matt Aimonetti
-https://github.com/mattetti
-
-
-
 
     rake -D compile
 
@@ -34,8 +20,6 @@ https://github.com/mattetti
 
 
 want to compile something else, first clean the files with "rake clean"
-
-for running your ruby files,please copy them to this folder and compile them
 
 
 Features 
@@ -82,13 +66,6 @@ planned features
 ================
 
 hope I can get the version to include C code and ruby together
-
-
-
-what I dont know
-================
-
-
 
 
 License
