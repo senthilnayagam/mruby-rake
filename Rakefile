@@ -99,7 +99,7 @@ task :compile, :program_name, :ruby_source, :use_gems do |t,args|
   
   # make one file from all the ruby source
   File.open("temp.rb", "w"){|f|
-    Dir.glob("*.rb").each do |r|
+    Dir.glob(args[:ruby_source]+"*.rb").each do |r|
       f.puts "# File: #{r}"
       f << File.read(r)
     end
