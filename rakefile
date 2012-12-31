@@ -37,6 +37,7 @@ def wrapper_code(insert=nil)
 #include "mruby.h"
 #include "mruby/irep.h"
 #include "mruby/proc.h"
+#include "mruby/array.h"
 
   #{insert}
 
@@ -58,7 +59,7 @@ main(int argc, char **argv)
     mrb_ary_push(mrb, ARGV, mrb_str_new(mrb, argv[i], strlen(argv[i])));
   }
   
-  mrb_define_global_const(mrb, \"ARGV\", ARGV);  
+  mrb_define_global_const(mrb, "ARGV", ARGV);  
 
   /* read and execute compiled symbols */
   int irep = mrb_read_irep(mrb, ruby_bytecode);
