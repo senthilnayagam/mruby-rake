@@ -1,3 +1,68 @@
+require 'rubygems'
+require 'rake'
+require 'pathname'
+
+module MRuby
+  module Gem
+    class << self
+      attr_accessor :processing_path
+    end
+
+    class Specification
+      include Rake::DSL
+
+      attr_reader :build
+      attr_accessor :name, :dir
+
+      def self.attr_array(*vars)
+        attr_reader *vars
+        vars.each do |v|
+          class_eval "def #{v}=(val);@#{v}||=[];@#{v}+=[val].flatten;end"
+        end
+      end
+
+      attr_array :licenses, :authors
+      alias :license= :licenses=
+      alias :author= :authors=
+      attr_array :cflags
+      attr_array :mruby_cflags, :mruby_includes, :mruby_ldflags, :mruby_libs
+
+      attr_array :rbfiles, :objs
+      attr_array :test_objs, :test_rbfiles
+      attr_accessor :test_preload
+   
+      @@instances = {}
+      def self.get_gem gem
+        @@instances[gem]
+      end
+      def self.gems
+        @@instances
+      end
+      def initialize(name, &block)
+        @name = name
+        @@instances[name] = self
+        #@build = MRuby.build
+        @dir = Gem.processing_path
+        @cflags, @cxxflags, @objcflags, @asmflags = [], [], [], []
+        @mruby_cflags, @mruby_ldflags, @mruby_libs = [], [], []
+        @mruby_includes = ["#{dir}/include"]
+        @rbfiles = Dir.glob("#{dir}/mrblib/*.rb")
+        @objs = Dir.glob("#{dir}/src/*.{c,cpp,m,asm,S}").map { |f| f.relative_path_from(@dir).to_s.pathmap("#{build_dir}/%X.o") }
+        @test_rbfiles = Dir.glob("#{dir}/test/*.rb")
+        @test_objs = Dir.glob("#{dir}/test/*.{c,cpp,m,asm,S}").map { |f| f.relative_path_from(dir).to_s.pathmap("#{build_dir}/%X.o") }
+        @test_preload = 'test/assert.rb'
+
+        instance_eval(&block)
+        end
+        def build_dir;end
+     end
+  end
+end
+
+Dir.glob("#{ENV['MRUBY_PATH']}/build/mrbgems/*/mrbgem.rake").each do |f|
+  load f
+end
+
 # Best to set MRUBY_PATH enviroment variable
 # - or -
 # Change the default path to match the path to your machine.
@@ -5,38 +70,18 @@
 # assumes mrbgems root is [mruby_path]/mrbgems
 def configure args
 	$mrb_path = ENV['MRUBY_PATH'] || File.expand_path("../mruby")
-	$mrbc = File.join($mrb_path,"/bin/mrbc")
-
-	$gems_active = args[:use_gems] == "true" ? true : false
-
-	$gem_path = File.join($mrb_path,"mrbgems")
-	$gem_init = File.join($gem_path,"gem_init.a")
-
-  if $gems_active
-	a = []
-	a1 = []
-
-	get_active_gems($gem_path).each_pair do |k,v|
-	  a << File.read(v[:ld_flags]).strip
-	  a1 << v[:lib]
-	end
-
-	$gems_list = a1.join(" ")
-	$gems_ld_flags = a.join(" ")
-  end
+	$mrbc = File.join($mrb_path,"/build/host/bin/mrbc")
 end
 
-# find active gems and get info about them
-def get_active_gems gem_path
-  h = {}
-  File.open(gem_path+"/GEMS.active").readlines.each do |g|
-    g=g.strip
-    gem_lib = Dir.glob(g+"/*-gem.a")[0]
-    gem_ldflags = File.join(g,"gem-ldflags.tmp")
-    h[g]={:lib=>gem_lib,:ld_flags=>gem_ldflags}
+
+def gem_ld_flags
+  a = []
+  MRuby::Gem::Specification.gems.each_pair do |n,g|
+    a << g.mruby_ldflags.join(" ")
   end
-  h
+  a.join(" ")
 end
+
 
 def wrapper_code(insert=nil)
   code = <<-EOF
@@ -115,10 +160,10 @@ task :compile, :program_name, :ruby_source, :use_gems do |t,args|
   File.open("#{args[:program_name]}.c", 'w'){|f| f << example_file}
 
   cmd = "gcc -I#{$mrb_path}/src -I#{$mrb_path}/include -c #{args[:program_name]}.c -o #{args[:program_name]}.o"
-  if $gems_active
-    cmd2 = "gcc -o ./#{args[:program_name]} #{args[:program_name]}.o #{$mrb_path}/lib/libmruby.a -lm #{$gem_init} #{$gems_list} #{$gems_ld_flags}";  
+  if args[:use_gems]
+    cmd2 = "gcc -o ./#{args[:program_name]} #{args[:program_name]}.o #{$mrb_path}/build/host/lib/libmruby.a -lm #{gem_ld_flags}";  
   else
-    cmd2 = "gcc -o ./#{args[:program_name]} #{args[:program_name]}.o #{$mrb_path}/lib/libmruby.a -lm"
+    cmd2 = "gcc -o ./#{args[:program_name]} #{args[:program_name]}.o #{$mrb_path}/build/host/lib/libmruby.a -lm"
   end
 
   puts cmd
