@@ -1,33 +1,45 @@
 mruby-rake
 ==========
 
-a rake task to complie your ruby code into a executable binary
+a simple rake task to complie your ruby code into a executable binary
+
+hacker news post to discuss it
+
+http://news.ycombinator.com/item?id=4709279
 
 
-    rake -D compile
+modified version of code found here
 
-    rake compile[program_name,ruby_source,use_gems]
-      Compiles all ruby files in pwd into an executable.
-      option: program_name,   the name of the resulting executable
-              ruby_source,    path to ruby files to compile
-    	      use_gems,       pass 'true' if mruby compiled with mrbgems
+https://gist.github.com/3850240/863acd980a0b29b0d86bd8cececb1d91b9b5bd83
+
+thanks Matt Aimonetti
+https://github.com/mattetti
 
 
-    rake compile[hello,./,false]  # the last argument, false, is implicit and does not need passed
-                                  # pass 'true' to link against mrbgems
 
-    ./hello                       # execute
+
+    rake -T
+
+    rake clean        # clean
+    rake compile      # example
+    rake compilefile  # compile file usage:  rake compilefile file=filename.rb
+
+    rake compilefile file=hello.rb 
+    compiled
+    executing
+    You can now run by running ./example
+
+
+    ./example
 
 
 want to compile something else, first clean the files with "rake clean"
 
+for running your ruby files,please copy them to this folder and compile them
 
-Features 
-===============
-    Compiled programs support passing argumentsfrom the command-line to ARGV
-    (initial) Support of (MRB)GEMS
-    Assembles source file from *.rb files in path specified ...
-    (order is alpha-numeric, naming convention must match require order)
+
+ 
+
 
 
 pre-requisites
@@ -66,6 +78,14 @@ planned features
 ================
 
 hope I can get the version to include C code and ruby together
+
+
+
+what I dont know
+================
+
+how to pass parameters to the compiled ruby app, need to try it
+
 
 
 License

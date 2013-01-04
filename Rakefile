@@ -95,16 +95,16 @@ task :compile, :program_name, :ruby_source, :use_gems do |t,args|
     f.puts "#{args[:program_name]}"
     f.puts "temp.rb"
     f.puts "temp.c"
+ 
   end
   
   # make one file from all the ruby source
   File.open("temp.rb", "w"){|f|
-    Dir.glob(args[:ruby_source]+"*.rb").each do |r|
+    Dir.glob(args[:ruby_source]+"*.rb").sort.each do |r|
       f.puts "# File: #{r}"
       f << File.read(r)
     end
   }
-
 
   # creates the .c file containing the bundled_ruby char array for the bytecode
   mrbc = "#{$mrbc} -Bruby_bytecode ./temp.rb"
